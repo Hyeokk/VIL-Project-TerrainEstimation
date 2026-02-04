@@ -1,1 +1,24 @@
 clearpath_simulator/clearpath/
+
+FAST_LIO/doc/*.png
+FAST_LIO/doc/*.pdf
+FAST_LIO/doc/*.jpg
+FAST_LIO/doc/*.gif
+
+# 빌드 및 로그 폴더 (보통 워크스페이스 루트에서 관리하지만 src 내에 있다면 추가)
+build/
+install/
+log/
+
+# 파이썬 캐시
+__pycache__/
+*.pyc
+
+# IDE 설정 파일
+.vscode/
+.idea/
+
+# 로컬 설정 및 임시 파일
+*.swp
+*~
+.DS_Store

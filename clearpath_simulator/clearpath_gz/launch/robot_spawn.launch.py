@@ -30,7 +30,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     EnvironmentVariable,
     LaunchConfiguration,
-    PathJoinSubstitution
+    PathJoinSubstitution,
+    Command,
+    FindExecutable
 )
 
 from launch_ros.actions import Node
@@ -54,7 +56,18 @@ ARGUMENTS = [
     DeclareLaunchArgument('generate',
                           default_value='true',
                           choices=['true', 'false'],
-                          description='Generate parameters and launch files')
+                          description='Generate parameters and launch files'),
+    DeclareLaunchArgument('use_auto_generated',
+                          default_value='true',
+                          choices=['true', 'false'],
+                          description='Use auto-generated URDF from robot.yaml'),
+    DeclareLaunchArgument('custom_description_path',
+                          default_value=PathJoinSubstitution([
+                              FindPackageShare('clearpath_gz'),
+                              'urdf',
+                              'custom_a200.urdf.xacro'
+                          ]),
+                          description='Path to custom URDF file')
 ]
 
 for pose_element in ['x', 'y', 'yaw']:
@@ -186,13 +199,6 @@ def launch_setup(context, *args, **kwargs):
         )
     )
 
-    event_generate_param = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=node_generate_param,
-            on_exit=[group_action_spawn_robot]
-        )
-    )
-
     # RViz
     rviz = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([rviz_launch]),
@@ -202,6 +208,37 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(LaunchConfiguration('rviz')),
     )
 
+    # Custom Description Content
+    use_auto_generated = LaunchConfiguration('use_auto_generated')
+    custom_description_path = LaunchConfiguration('custom_description_path')
+
+    robot_description_content = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name='xacro')]),
+            ' ',
+            custom_description_path,
+            ' ',
+            'namespace:=', namespace,
+            ' ',
+            'is_sim:=true'
+        ]
+    )
+
+    # Wrapper for Auto Spawn with Condition
+    spawn_robot_auto = GroupAction(
+        actions=[group_action_spawn_robot],
+        condition=IfCondition(use_auto_generated)
+    )
+
+    # Update event to use unconditional wrapper
+    event_generate_param = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=node_generate_param,
+            on_exit=[spawn_robot_auto]
+        )
+    )
+
+    # Automatically generated logic
     do_generate = GroupAction(
         actions=[
             node_generate_description,
@@ -213,13 +250,139 @@ def launch_setup(context, *args, **kwargs):
         ],
         condition=IfCondition(LaunchConfiguration('generate'))
     )
+
+    # Fallback Spawn (Auto Generated, No Generation)
+    do_spawn_auto_fallback = GroupAction(
+        actions=[spawn_robot_auto],
+        condition=UnlessCondition(LaunchConfiguration('generate'))
+    )
+
+    # Custom Spawn Services (Duplicate platform logic without RSP)
+    pkg_clearpath_control = FindPackageShare('clearpath_control')
     
-    do_not_generate = GroupAction(actions=[group_action_spawn_robot],
-                                  condition=UnlessCondition(LaunchConfiguration('generate')))
+    launch_file_teleop_base = PathJoinSubstitution([
+        pkg_clearpath_control, 'launch', 'teleop_base.launch.py'])
+    launch_file_teleop_joy = PathJoinSubstitution([
+        pkg_clearpath_control, 'launch', 'teleop_joy.launch.py'])
+    launch_file_localization = PathJoinSubstitution([
+        pkg_clearpath_control, 'launch', 'localization.launch.py'])
+
+    # Bridge Nodes (Copied from platform-service.launch.py)
+    node_cmd_vel_bridge = Node(
+        name='cmd_vel_bridge',
+        executable='parameter_bridge',
+        package='ros_gz_bridge',
+        namespace=namespace,
+        output='screen',
+        arguments=[
+            '/cmd_vel@geometry_msgs/msg/Twist[ignition.msgs.Twist',
+            '/model/' + robot_name + '/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist'
+        ],
+        remappings=[
+            ('/cmd_vel', 'cmd_vel'),
+            ('/model/' + robot_name + '/cmd_vel', 'platform/cmd_vel_unstamped')
+        ],
+        parameters=[{'use_sim_time': use_sim_time}]
+    )
+
+    node_odom_base_tf_bridge = Node(
+        name='odom_base_tf_bridge',
+        executable='parameter_bridge',
+        package='ros_gz_bridge',
+        namespace=namespace,
+        output='screen',
+        arguments=[
+            '/model/' + robot_name + '/tf@tf2_msgs/msg/TFMessage[ignition.msgs.Pose_V'
+        ],
+        remappings=[
+            ('/model/' + robot_name + '/tf', 'tf')
+        ],
+        parameters=[{'use_sim_time': use_sim_time}]
+    )
+
+    # Custom Spawn (Manual URDF)
+    do_spawn_custom = GroupAction(
+        actions=[
+            # Robot State Publisher
+            Node(
+                package='robot_state_publisher',
+                executable='robot_state_publisher',
+                name='robot_state_publisher',
+                output='screen',
+                parameters=[{'use_sim_time': use_sim_time,
+                             'robot_description': robot_description_content}]
+            ),
+            # Spawn Robot
+            Node(
+                package='ros_gz_sim',
+                executable='create',
+                namespace=namespace,
+                arguments=['-name', robot_name,
+                           '-x', x,
+                           '-y', y,
+                           '-z', z,
+                           '-Y', yaw,
+                           '-topic', 'robot_description'],
+                output='screen'
+            ),
+            # Spawners
+            Node(
+                package='controller_manager',
+                executable='spawner',
+                arguments=['joint_state_broadcaster'],
+                output='screen',
+            ),
+            Node(
+                package='controller_manager',
+                executable='spawner',
+                arguments=['platform_velocity_controller'],
+                output='screen',
+            ),
+            # Teleop (TwistMux)
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([launch_file_teleop_base]),
+                launch_arguments=[
+                  ('setup_path', setup_path),
+                  ('use_sim_time', use_sim_time),
+                ]
+            ),
+            # Joystick
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([launch_file_teleop_joy]),
+                launch_arguments=[
+                  ('setup_path', setup_path),
+                  ('use_sim_time', use_sim_time),
+                ]
+            ),
+            # Localization (EKF)
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([launch_file_localization]),
+                launch_arguments=[
+                  ('setup_path', setup_path),
+                  ('use_sim_time', use_sim_time),
+                  ('enable_ekf', 'true')
+                ]
+            ),
+            # Bridges
+            node_cmd_vel_bridge,
+            node_odom_base_tf_bridge,
+            # Sensors and Manipulators (Assuming no RSP)
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([launch_file_sensors_service]),
+                launch_arguments=[
+                  ('prefix', ['/world/', world, '/model/', robot_name, '/link/base_link/sensor/'])]
+            ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([launch_file_manipulators_service]),
+            ),
+        ],
+        condition=UnlessCondition(use_auto_generated)
+    )
 
     return [
         do_generate,
-        do_not_generate
+        do_spawn_auto_fallback,
+        do_spawn_custom
     ]
 
 

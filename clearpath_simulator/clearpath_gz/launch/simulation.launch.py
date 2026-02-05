@@ -48,9 +48,20 @@ ARGUMENTS = [
                           choices=['true', 'false'],
                           description='use_sim_time'),
     DeclareLaunchArgument('generate',
-                      default_value='true',
-                      choices=['true', 'false'],
-                      description='Generate parameters and launch files'),
+                          default_value='true',
+                          choices=['true', 'false'],
+                          description='Generate parameters and launch files'),
+    DeclareLaunchArgument('use_auto_generated',
+                          default_value='true',
+                          choices=['true', 'false'],
+                          description='Use auto-generated URDF from robot.yaml'),
+    DeclareLaunchArgument('custom_description_path',
+                          default_value=PathJoinSubstitution([
+                              get_package_share_directory('clearpath_gz'),
+                              'urdf',
+                              'custom_a200.urdf.xacro'
+                          ]),
+                          description='Path to custom URDF file')
 ]
 
 for pose_element in ['x', 'y', 'yaw']:
@@ -90,7 +101,9 @@ def generate_launch_description():
             ('y', LaunchConfiguration('y')),
             ('z', LaunchConfiguration('z')),
             ('yaw', LaunchConfiguration('yaw')),
-            ('generate', LaunchConfiguration('generate'))]
+            ('generate', LaunchConfiguration('generate')),
+            ('use_auto_generated', LaunchConfiguration('use_auto_generated')),
+            ('custom_description_path', LaunchConfiguration('custom_description_path'))]
     )
 
     # Create launch description and add actions

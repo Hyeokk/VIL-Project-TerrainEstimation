@@ -63,17 +63,39 @@ def generate_launch_description():
 		description='Name of the dataset'
 	)
 
+	tf_camera_init_odom = launch_ros.actions.Node(
+		package='tf2_ros',
+		executable='static_transform_publisher',
+		name='camera_init_odom',
+		arguments=['0', '0', '0', '0', '0', '0', 'camera_init', 'odom']
+	)
+	tf_body_velodyne = launch_ros.actions.Node(
+		package='tf2_ros',
+		executable='static_transform_publisher',
+		name='body_velodyne',
+		arguments=['0', '0', '0', '0', '0', '0', 'body', 'velodyne']
+	)
+	tf_body_base_link = launch_ros.actions.Node(
+		package='tf2_ros',
+		executable='static_transform_publisher',
+		name='body_base_link',
+		arguments=['0', '0', '0', '0', '0', '0', 'body', 'base_link']
+	)
+
 	launch_description = launch.LaunchDescription([
 		dataset_name_arg,
-	    IncludeLaunchDescription(
-            PathJoinSubstitution([launch_dir, 'GroundGrid.launch.py']),
-            launch_arguments={
-                'dataset_name': launch.substitutions.LaunchConfiguration('dataset_name'),
-                'pointcloud_topic': '/cloud_registered',
-                'odometry_topic': '/Odometry'
-            }.items()
-        ),
-	    rviz2
+		tf_camera_init_odom,
+		tf_body_velodyne,
+		tf_body_base_link,
+		IncludeLaunchDescription(
+			PathJoinSubstitution([launch_dir, 'GroundGrid.launch.py']),
+			launch_arguments={
+				'dataset_name': launch.substitutions.LaunchConfiguration('dataset_name'),
+				'pointcloud_topic': '/cloud_registered',
+				'odometry_topic': '/Odometry'
+			}.items()
+		),
+		rviz2
 	])
 
 	return launch_description

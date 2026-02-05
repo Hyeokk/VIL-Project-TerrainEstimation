@@ -6,7 +6,7 @@ system:
     - hostname: cpr-a200-0000
       ip: 192.168.131.1
   ros2:
-    namespace: a200_0000
+    namespace: "/"
     domain_id: 0
     middleware:
       implementation: rmw_fastrtps_cpp

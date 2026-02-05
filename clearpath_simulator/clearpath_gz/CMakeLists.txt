@@ -9,7 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY config geotif launch meshes worlds
+  DIRECTORY config geotif launch meshes worlds urdf
   DESTINATION share/${PROJECT_NAME}
 )
 

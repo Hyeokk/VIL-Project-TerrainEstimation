@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="a200-0000">
+
+  <xacro:arg name="is_sim" default="true" />
+  <xacro:arg name="namespace" default="/" />
+  <xacro:arg name="gazebo_controllers" default="$(find clearpath_control)/config/a200/control.yaml" />
+
+  <!-- Include Platform Description -->
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/common.urdf.xacro" />
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/a200/a200.urdf.xacro" />
+  
+  <!-- Include Attachments -->
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/a200/attachments/bumper.urdf.xacro" />
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/a200/attachments/top_plate.urdf.xacro" />
+  <xacro:include filename="$(find clearpath_platform_description)/urdf/a200/attachments/sensor_arch.urdf.xacro" />
+
+  <!-- Include Mounts -->
+  <xacro:include filename="$(find clearpath_mounts_description)/urdf/pacs/bracket.urdf.xacro" />
+  <xacro:include filename="$(find clearpath_mounts_description)/urdf/fath_pivot.urdf.xacro" />
+
+  <!-- Include Sensors -->
+  <xacro:include filename="$(find clearpath_sensors_description)/urdf/intel_realsense.urdf.xacro" />
+  <xacro:include filename="$(find clearpath_sensors_description)/urdf/velodyne_lidar.urdf.xacro" />
+  <xacro:include filename="$(find clearpath_sensors_description)/urdf/hokuyo_ust.urdf.xacro" />
+  <xacro:include filename="$(find clearpath_sensors_description)/urdf/microstrain_imu.urdf.xacro" />
+
+  <!-- Initialize A200 Platform -->
+  <xacro:a200 wheel="default" />
+
+  <!-- Attachments -->
+  <xacro:bumper name="front_bumper" model="default" parent_link="front_bumper_mount" extension="0.0">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:bumper>
+
+  <xacro:bumper name="rear_bumper" model="default" parent_link="rear_bumper_mount" extension="0.0">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:bumper>
+
+  <xacro:top_plate name="top_plate" model="pacs" parent_link="default_mount">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:top_plate>
+
+  <xacro:sensor_arch name="sensor_arch" model="sensor_arch_300" parent_link="default_mount">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:sensor_arch>
+
+  <!-- Mounts -->
+  <xacro:bracket name="bracket_0" parent_link="top_plate_mount_d1" model="horizontal">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:bracket>
+
+  <xacro:fath_pivot name="fath_pivot_0" parent_link="sensor_arch_mount" angle="0.0">
+    <origin xyz="0 0 -0.021" rpy="${pi} 0 0" />
+  </xacro:fath_pivot>
+
+  <!-- Sensors -->
+  
+  <!-- IMU -->
+  <xacro:microstrain_imu name="imu_0" parent_link="base_link" update_rate="100">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:microstrain_imu>
+
+  <!-- 2D Lidar (Hokuyo) -->
+  <xacro:hokuyo_ust name="lidar2d_0" parent_link="bracket_0_mount" update_rate="40" min_range="0.06" max_range="30.0">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:hokuyo_ust>
+
+  <!-- 3D Lidar (Velodyne) -->
+  <xacro:velodyne_lidar name="lidar3d_0" parent_link="sensor_arch_mount" update_rate="20" min_range="0.9" max_range="130.0">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:velodyne_lidar>
+
+  <!-- Camera (RealSense) -->
+  <xacro:intel_realsense name="camera_0" parent_link="fath_pivot_0_mount" update_rate="30.0">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:intel_realsense>
+
+</robot>

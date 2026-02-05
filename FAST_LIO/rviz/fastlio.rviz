@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Odometry1
       Splitter Ratio: 0.5
     Tree Height: 549
   - Class: rviz_common/Selection
@@ -34,9 +35,173 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        base_footprint:
+          Value: true
+        base_link:
+          Value: true
         body:
           Value: true
+        bracket_0_link:
+          Value: true
+        bracket_0_mount:
+          Value: true
+        camera_0_bottom_screw_frame:
+          Value: true
+        camera_0_color_frame:
+          Value: true
+        camera_0_color_optical_frame:
+          Value: true
+        camera_0_depth_frame:
+          Value: true
+        camera_0_depth_optical_frame:
+          Value: true
+        camera_0_infra1_frame:
+          Value: true
+        camera_0_infra1_optical_frame:
+          Value: true
+        camera_0_infra2_frame:
+          Value: true
+        camera_0_infra2_optical_frame:
+          Value: true
+        camera_0_link:
+          Value: true
         camera_init:
+          Value: true
+        default_mount:
+          Value: true
+        fath_pivot_0_hinge_link:
+          Value: true
+        fath_pivot_0_link:
+          Value: true
+        fath_pivot_0_mount:
+          Value: true
+        front_bumper_base_link:
+          Value: true
+        front_bumper_link:
+          Value: true
+        front_bumper_mount:
+          Value: true
+        front_left_wheel:
+          Value: true
+        front_right_wheel:
+          Value: true
+        imu_0_base_link:
+          Value: true
+        imu_0_link:
+          Value: true
+        inertial_link:
+          Value: true
+        lidar2d_0_laser:
+          Value: true
+        lidar2d_0_link:
+          Value: true
+        lidar3d_0_laser:
+          Value: true
+        lidar3d_0_link:
+          Value: true
+        odom:
+          Value: true
+        rear_bumper_base_link:
+          Value: true
+        rear_bumper_link:
+          Value: true
+        rear_bumper_mount:
+          Value: true
+        rear_left_wheel:
+          Value: true
+        rear_right_wheel:
+          Value: true
+        robot/base_link/camera_0:
+          Value: true
+        robot/base_link/imu_0:
+          Value: true
+        robot/base_link/lidar2d_0:
+          Value: true
+        robot/base_link/lidar3d_0:
+          Value: true
+        sensor_arch_link:
+          Value: true
+        sensor_arch_mount:
+          Value: true
+        top_chassis_link:
+          Value: true
+        top_plate_adjust_link:
+          Value: true
+        top_plate_link:
+          Value: true
+        top_plate_mount_a1:
+          Value: true
+        top_plate_mount_a2:
+          Value: true
+        top_plate_mount_a3:
+          Value: true
+        top_plate_mount_a4:
+          Value: true
+        top_plate_mount_a5:
+          Value: true
+        top_plate_mount_a6:
+          Value: true
+        top_plate_mount_a7:
+          Value: true
+        top_plate_mount_a8:
+          Value: true
+        top_plate_mount_b1:
+          Value: true
+        top_plate_mount_b2:
+          Value: true
+        top_plate_mount_b7:
+          Value: true
+        top_plate_mount_b8:
+          Value: true
+        top_plate_mount_c1:
+          Value: true
+        top_plate_mount_c2:
+          Value: true
+        top_plate_mount_c7:
+          Value: true
+        top_plate_mount_c8:
+          Value: true
+        top_plate_mount_d1:
+          Value: true
+        top_plate_mount_d2:
+          Value: true
+        top_plate_mount_d7:
+          Value: true
+        top_plate_mount_d8:
+          Value: true
+        top_plate_mount_e1:
+          Value: true
+        top_plate_mount_e2:
+          Value: true
+        top_plate_mount_e7:
+          Value: true
+        top_plate_mount_e8:
+          Value: true
+        top_plate_mount_f1:
+          Value: true
+        top_plate_mount_f2:
+          Value: true
+        top_plate_mount_f7:
+          Value: true
+        top_plate_mount_f8:
+          Value: true
+        top_plate_mount_g1:
+          Value: true
+        top_plate_mount_g2:
+          Value: true
+        top_plate_mount_g3:
+          Value: true
+        top_plate_mount_g4:
+          Value: true
+        top_plate_mount_g5:
+          Value: true
+        top_plate_mount_g6:
+          Value: true
+        top_plate_mount_g7:
+          Value: true
+        top_plate_mount_g8:
+          Value: true
+        user_bay_cover_link:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -65,7 +230,7 @@ Visualization Manager:
           Color: 204; 51; 204
           Scale: 1
           Value: true
-        Value: true
+        Value: false
       Enabled: true
       Keep: 100
       Name: Odometry
@@ -119,8 +284,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 11.062739372253418
-        Min Value: -13.864188194274902
+        Max Value: 7.679736137390137
+        Min Value: -3.0286922454833984
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -264,7 +429,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 216.99887084960938
+      Distance: 20.879661560058594
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -279,10 +444,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5697963237762451
+      Pitch: 0.5597963333129883
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz_default_plugins)
-      Yaw: 4.88355827331543
+      Yaw: 3.593557119369507
     Saved: ~
 Window Geometry:
   Displays:
